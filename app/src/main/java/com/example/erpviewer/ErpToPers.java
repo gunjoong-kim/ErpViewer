@@ -24,18 +24,14 @@ public class ErpToPers
 
     private final String mVertexCode =
             "#define PI 3.1415926535897932384626433832795\n" +
-                    "uniform mat4 uMVPMatrix;\n" +
-                    "attribute vec4 aPosition;\n" +
-                    "attribute vec2 aTexCoord;\n" +
-                    "varying vec2 vTexCoord;\n" +
-                    "void main()\n" +
-                    "{\n" +
-                    "   gl_Position = uMVPMatrix * aPosition;\n" +
-                    "   vec2 tmp;\n" +
-                    "   float cosc = cos(PI / 2.0 - aPosition.y) - cos(aPosition.y) * cos(aPosition.x);\n" +
-                    "   tmp.x = (cos(aPosition.y) * sin(aPosition.x)) / cosc;\n" +
-                    "   tmp.y = (cos(PI / 2.0) * sin(aPosition.y) + sin(PI / 2.0) * cos(aPosition.y) * cos(aPosition.x)) / cosc;\n" +
-                    "   vTexCoord = tmp;\n" +
+                    "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 aPosition;" +
+                    "attribute vec2 aTexCoord;" +
+                    "varying vec2 vTexCoord;" +
+                    "void main()" +
+                    "{" +
+                    "   gl_Position = uMVPMatrix * aPosition;" +
+                    "   vTexCoord = aTexCoord;" +
                     "}";
     private final String mFragmentCode =
                 "precision mediump float;" +
@@ -86,24 +82,28 @@ public class ErpToPers
     private final int vertexStride = COORDS_PER_VERTEX * 4;
     private static final String TAG = "MyRenderer";
 
+    private Sphere sphere;
+
     public ErpToPers()
     {
-        ByteBuffer bb = ByteBuffer.allocateDirect(imageCoords.length * 4);
+        sphere = new Sphere(15.0f, 20, 20);
+
+        ByteBuffer bb = ByteBuffer.allocateDirect(sphere.getVertices().length * 4);
         bb.order(ByteOrder.nativeOrder());
         mVertexBuffer = bb.asFloatBuffer();
-        mVertexBuffer.put(imageCoords);
+        mVertexBuffer.put(sphere.getVertices());
         mVertexBuffer.position(0);
 
-        ByteBuffer ib = ByteBuffer.allocateDirect(indices.length * 2);
+        ByteBuffer ib = ByteBuffer.allocateDirect(sphere.getIndices().length * 2);
         ib.order(ByteOrder.nativeOrder());
         mIndexBuffer = ib.asShortBuffer();
-        mIndexBuffer.put(indices);
+        mIndexBuffer.put(sphere.getIndices());
         mIndexBuffer.position(0);
 
-        ByteBuffer tb = ByteBuffer.allocateDirect(texCoords.length * 4);
+        ByteBuffer tb = ByteBuffer.allocateDirect(sphere.getTexCoords().length * 4);
         tb.order(ByteOrder.nativeOrder());
         mTexBuffer = tb.asFloatBuffer();
-        mTexBuffer.put(texCoords);
+        mTexBuffer.put(sphere.getTexCoords());
         mTexBuffer.position(0);
 
         int vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
@@ -160,7 +160,7 @@ public class ErpToPers
         GLES20.glUniform1i(textureUniformHandle, 0);
 
         GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.length, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, sphere.getIndices().length, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer);
         GLES20.glDisableVertexAttribArray(positionHandle);
         GLES20.glDisableVertexAttribArray(textureHandle);
     }
