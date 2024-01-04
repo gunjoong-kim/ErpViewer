@@ -55,7 +55,7 @@ public class Sphere {
         }
     }
 
-    // 정점 및 인덱스 데이터에 접근하기 위한 getter 메서드
+    // getter
     public float[] getVertices() {
         return mVertices;
     }
