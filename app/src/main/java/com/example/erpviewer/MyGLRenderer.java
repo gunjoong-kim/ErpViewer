@@ -71,7 +71,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         if (textureHandle[0] != 0) {
             final BitmapFactory.Options options = new BitmapFactory.Options();
             options.inScaled = false;
-            final Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.image2, options);
+            final Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.image3, options);
 
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
 

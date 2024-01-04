@@ -1,13 +1,11 @@
 package com.example.erpviewer;
 
 import android.opengl.GLES20;
+import android.util.Log;
 import java.nio.FloatBuffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import java.lang.Math;
-import android.util.Log;
-
 
 public class ErpToPers
 {
@@ -51,7 +49,7 @@ public class ErpToPers
 
     public ErpToPers()
     {
-        mSphere = new Sphere(10.0f, 20, 20);
+        mSphere = new Sphere(10.0f, 50, 50);
         mVertexCnt = mSphere.getVertices().length;
         mIndiceCnt = mSphere.getIndices().length;
         mTexCoordCnt = mSphere.getTexCoords().length;
