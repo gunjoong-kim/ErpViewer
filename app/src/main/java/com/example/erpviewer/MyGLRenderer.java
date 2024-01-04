@@ -32,7 +32,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
         mErpToPers = new ErpToPers();
-        mErpToPers.setTexture(loadTexture());
+        mErpToPers.setTexture(loadTexture(R.drawable.warehouse));
 
         // Set Background Color Black
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -59,19 +59,27 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     {
         float ratio = (float) width / height;
         GLES20.glViewport(0, 0, width, height);
+        // change the near value to zoom in/out
+        // To Do : zoom in/out
         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 40);
     }
 
-    public int loadTexture()
+    public void changeTexture(int resourceId)
+    {
+        mErpToPers.setTexture(loadTexture(resourceId));
+    }
+
+    public int loadTexture(int resourceId)
     {
         final int[] textureHandle = new int[1];
 
         GLES20.glGenTextures(1, textureHandle, 0);
 
-        if (textureHandle[0] != 0) {
+        if (textureHandle[0] != 0)
+        {
             final BitmapFactory.Options options = new BitmapFactory.Options();
             options.inScaled = false;
-            final Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.image3, options);
+            final Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), resourceId, options);
 
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
 
@@ -93,7 +101,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         int[] compileStatus = new int[1];
         GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compileStatus, 0);
 
-        if (compileStatus[0] == 0) {
+        if (compileStatus[0] == 0)
+        {
             String compileLog = GLES20.glGetShaderInfoLog(shader);
             Log.e("Shader", "shader compilation failed:\n" + compileLog);
             GLES20.glDeleteShader(shader);

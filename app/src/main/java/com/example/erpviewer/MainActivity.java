@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity
     private ImageView mImageView;
     private FrameLayout mContainer;
     private Button mToggleButton;
+    private Button mChangeTexButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -25,7 +26,7 @@ public class MainActivity extends AppCompatActivity
         mErpView = new MyGLSurfaceView(this);
         mErpView.setVisibility(View.GONE);
         mImageView = new ImageView(this);
-        mImageView.setImageResource(R.drawable.image3);
+        mImageView.setImageResource(R.drawable.warehouse);
         mImageView.setScaleType(ImageView.ScaleType.FIT_XY);
 
         mContainer.addView(mErpView);
@@ -40,7 +41,8 @@ public class MainActivity extends AppCompatActivity
 
         mToggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 toggleView();
             }
         });

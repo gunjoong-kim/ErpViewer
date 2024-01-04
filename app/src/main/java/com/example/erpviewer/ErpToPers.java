@@ -49,7 +49,7 @@ public class ErpToPers
 
     public ErpToPers()
     {
-        mSphere = new Sphere(10.0f, 50, 50);
+        mSphere = new Sphere(10.0f, 100, 100);
         mVertexCnt = mSphere.getVertices().length;
         mIndiceCnt = mSphere.getIndices().length;
         mTexCoordCnt = mSphere.getTexCoords().length;
@@ -79,11 +79,6 @@ public class ErpToPers
         GLES20.glAttachShader(mProgram, vertexShader);
         GLES20.glAttachShader(mProgram, fragmentShader);
         GLES20.glLinkProgram(mProgram);
-    }
-
-    public void draw(float[] mvpMatrix)
-    {
-        GLES20.glUseProgram(mProgram);
 
         int positionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition");
         GLES20.glEnableVertexAttribArray(positionHandle);
@@ -92,6 +87,11 @@ public class ErpToPers
         int textureHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoord");
         GLES20.glEnableVertexAttribArray(textureHandle);
         GLES20.glVertexAttribPointer(textureHandle, COORDS_PER_TEXTURE, GLES20.GL_FLOAT, false, mTexCoordStride, mTexBuffer);
+    }
+
+    public void draw(float[] mvpMatrix)
+    {
+        GLES20.glUseProgram(mProgram);
 
         int mvpMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
@@ -102,8 +102,6 @@ public class ErpToPers
         GLES20.glUniform1i(textureUniformHandle, 0);
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndiceCnt, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer);
-        GLES20.glDisableVertexAttribArray(positionHandle);
-        GLES20.glDisableVertexAttribArray(textureHandle);
     }
 
     public void setTexture(int texture)

@@ -24,11 +24,11 @@ public class Sphere {
                 float y = (float) (Math.cos(phi) * radius);
                 float z = (float) (Math.sin(phi) * Math.sin(theta) * radius);
 
-                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 3 + 0] = x;
+                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 3] = x;
                 mVertices[(stackNumber * (slices + 1) + sliceNumber) * 3 + 1] = y;
                 mVertices[(stackNumber * (slices + 1) + sliceNumber) * 3 + 2] = z;
 
-                mTexCoords[(stackNumber * (slices + 1) + sliceNumber) * 2 + 0] = (float)sliceNumber / slices;
+                mTexCoords[(stackNumber * (slices + 1) + sliceNumber) * 2] = (float)sliceNumber / slices;
                 mTexCoords[(stackNumber * (slices + 1) + sliceNumber) * 2 + 1] = (float)stackNumber / stacks;
             }
         }
