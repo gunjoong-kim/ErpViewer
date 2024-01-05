@@ -11,7 +11,7 @@ import java.nio.ShortBuffer;
 public class ErpToPers
 {
     private final String mVertexCode =
-            "#version 300 es\n" +
+                    "#version 300 es\n" +
                     "uniform mat4 uMVPMatrix;" +
                     "layout(location = 0) in vec4 aPosition;" +
                     "layout(location = 1) in vec2 aTexCoord;" +
@@ -22,21 +22,22 @@ public class ErpToPers
                     "   vTexCoord = aTexCoord;" +
                     "}";
     private final String mFragmentCode =
-            "#version 300 es\n" +
-                "precision mediump float;" +
-                "in vec2 vTexCoord;" +
+                    "#version 300 es\n" +
+                    "precision mediump float;" +
+                    "in vec2 vTexCoord;" +
                     "out vec4 fragColor;" +
-                "uniform sampler2D uTexture;" +
-                "void main()" +
-                "{" +
-                "   fragColor = texture(uTexture, vTexCoord);" +
-                "}";
+                    "uniform sampler2D uTexture;" +
+                    "void main()" +
+                    "{" +
+                    "   fragColor = texture(uTexture, vTexCoord);" +
+                    "}";
 
     static final int COORDS_PER_VERTEX = 3;
     static final int COORDS_PER_TEXTURE = 2;
     static final int COORDS_PER_BUFFER = COORDS_PER_VERTEX + COORDS_PER_TEXTURE; // vertex 3 + tex 2
     private FloatBuffer mVertexBuffer;
     private ShortBuffer mIndexBuffer;
+    private ShortBuffer mTestBuffer;
     private final int mProgram;
     private int mTexture;
 
@@ -44,8 +45,8 @@ public class ErpToPers
     private final int mIndiceCnt;
     private final int mVertexStride = COORDS_PER_VERTEX * 4;
     private static final String TAG = "ErpToPers";
-    private int[] mVao;
-
+    private int[] mSphereVao;
+    private int[] mPlaneVao;
     private Sphere mSphere;
 
     public ErpToPers()
@@ -75,9 +76,9 @@ public class ErpToPers
         GLES30.glLinkProgram(mProgram);
 
         // vao
-        mVao = new int[1];
-        GLES30.glGenVertexArrays(1, mVao, 0);
-        GLES30.glBindVertexArray(mVao[0]);
+        mSphereVao = new int[1];
+        GLES30.glGenVertexArrays(1, mSphereVao, 0);
+        GLES30.glBindVertexArray(mSphereVao[0]);
 
         // vbo
         int[] vbo = new int[1];
@@ -100,13 +101,40 @@ public class ErpToPers
 
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
         GLES30.glBindVertexArray(0);
+
+        // Test
+        mPlaneVao = new int[1];
+        GLES30.glGenVertexArrays(1, mPlaneVao, 0);
+        GLES30.glBindVertexArray(mPlaneVao[0]);
+
+        int[] planeHandle = new int[1];
+        GLES30.glGenBuffers(1, planeHandle, 0);
+        GLES30.glBindBuffer(GLES20.GL_ARRAY_BUFFER, planeHandle[0]);
+        FloatBuffer vertexBuffer = ByteBuffer.allocateDirect(planeVertices.length * 4)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        vertexBuffer.put(planeVertices).position(0);
+        GLES30.glBufferData(GLES20.GL_ARRAY_BUFFER, planeVertices.length * 4, vertexBuffer, GLES30.GL_STATIC_DRAW);
+
+        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 5 * 4, 0);
+        GLES30.glEnableVertexAttribArray(0);
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 5 * 4, 12);
+        GLES30.glEnableVertexAttribArray(1);
+
+        ByteBuffer tb = ByteBuffer.allocateDirect(index.length * 2);
+        tb.order(ByteOrder.nativeOrder());
+        mTestBuffer = ib.asShortBuffer();
+        mTestBuffer.put(index);
+        mTestBuffer.position(0);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+        GLES30.glBindVertexArray(0);
     }
 
     public void draw(float[] mvpMatrix)
     {
         GLES30.glUseProgram(mProgram);
 
-        GLES30.glBindVertexArray(mVao[0]);
+        GLES30.glBindVertexArray(mSphereVao[0]);
 
         int mvpMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
@@ -119,9 +147,11 @@ public class ErpToPers
         GLES30.glDrawElements(GLES30.GL_TRIANGLES, mIndiceCnt, GLES30.GL_UNSIGNED_SHORT, 0);
     }
 
-    private void checkGLError(String operation) {
+    private void checkGLError(String operation)
+    {
         int error;
-        while ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR) {
+        while ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR)
+        {
             Log.e("MyGLRenderer", operation + ": glError " + error);
             throw new RuntimeException(operation + ": glError " + error);
         }

@@ -37,6 +37,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
+
         mErpToPers = new ErpToPers();
         mErpToPers.setTexture(loadTexture(R.drawable.warehouse));
 
@@ -48,7 +49,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 unused)
     {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
-        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, mNear, mFar);
+        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1,  1, mNear, mFar);
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 0, 0f, 0f, 3f, 0f, 1.0f, 0.0f);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
