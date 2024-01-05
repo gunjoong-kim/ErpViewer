@@ -2,7 +2,6 @@ package com.example.erpviewer;
 
 public class Sphere {
     private float[] mVertices; // 정점 데이터
-    private float[] mTexCoords;
     private short[] mIndices; // 인덱스 데이터
 
     public Sphere(float radius, int stacks, int slices) {
@@ -12,8 +11,7 @@ public class Sphere {
 
     private void createVertices(float radius, int stacks, int slices) {
         int vertexCount = (stacks + 1) * (slices + 1);
-        mVertices = new float[vertexCount * 3];
-        mTexCoords = new float[vertexCount * 2];
+        mVertices = new float[vertexCount * 5];
 
         for (int stackNumber = 0; stackNumber <= stacks; ++stackNumber) {
             float phi = (float) (Math.PI / stacks * stackNumber); // 위도
@@ -24,12 +22,13 @@ public class Sphere {
                 float y = (float) (Math.cos(phi) * radius);
                 float z = (float) (Math.sin(phi) * Math.sin(theta) * radius);
 
-                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 3] = x;
-                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 3 + 1] = y;
-                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 3 + 2] = z;
-
-                mTexCoords[(stackNumber * (slices + 1) + sliceNumber) * 2] = (float)sliceNumber / slices;
-                mTexCoords[(stackNumber * (slices + 1) + sliceNumber) * 2 + 1] = (float)stackNumber / stacks;
+                // vertex coord
+                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 5] = x;
+                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 5 + 1] = y;
+                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 5 + 2] = z;
+                // tex coord
+                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 5 + 3] = (float)sliceNumber / slices;
+                mVertices[(stackNumber * (slices + 1) + sliceNumber) * 5 + 4] = (float)stackNumber / stacks;
             }
         }
     }
@@ -64,7 +63,4 @@ public class Sphere {
         return mIndices;
     }
 
-    public float[] getTexCoords() {
-        return mTexCoords;
-    }
 }

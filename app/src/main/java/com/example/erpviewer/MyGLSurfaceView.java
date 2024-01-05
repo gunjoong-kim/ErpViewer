@@ -3,6 +3,7 @@ package com.example.erpviewer;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
+import android.util.Log;
 
 public class MyGLSurfaceView extends GLSurfaceView
 {
@@ -19,7 +20,7 @@ public class MyGLSurfaceView extends GLSurfaceView
         mPreviousX = 0;
         mPreviousY = 0;
 
-        setEGLContextClientVersion(2);
+        setEGLContextClientVersion(3);
         mRenderer = new MyGLRenderer(context);
 
         setRenderer(mRenderer);
@@ -33,7 +34,7 @@ public class MyGLSurfaceView extends GLSurfaceView
         float x = e.getX();
         float y = e.getY();
 
-        switch (e.getAction() & MotionEvent.ACTION_MASK) // Changed to handle multi-touch events
+        switch (e.getAction() & MotionEvent.ACTION_MASK)
         {
             case MotionEvent.ACTION_MOVE:
             {

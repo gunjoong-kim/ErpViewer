@@ -1,6 +1,7 @@
 package com.example.erpviewer;
 
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.util.Log;
 import java.nio.FloatBuffer;
 import java.nio.ByteBuffer;
@@ -10,40 +11,40 @@ import java.nio.ShortBuffer;
 public class ErpToPers
 {
     private final String mVertexCode =
-            "#define PI 3.1415926535897932384626433832795\n" +
+            "#version 300 es\n" +
                     "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 aPosition;" +
-                    "attribute vec2 aTexCoord;" +
-                    "varying vec2 vTexCoord;" +
+                    "layout(location = 0) in vec4 aPosition;" +
+                    "layout(location = 1) in vec2 aTexCoord;" +
+                    "out vec2 vTexCoord;" +
                     "void main()" +
                     "{" +
                     "   gl_Position = uMVPMatrix * aPosition;" +
                     "   vTexCoord = aTexCoord;" +
                     "}";
     private final String mFragmentCode =
+            "#version 300 es\n" +
                 "precision mediump float;" +
-                "varying vec2 vTexCoord;" +
+                "in vec2 vTexCoord;" +
+                    "out vec4 fragColor;" +
                 "uniform sampler2D uTexture;" +
                 "void main()" +
                 "{" +
-                "   gl_FragColor = texture2D(uTexture, vTexCoord);" +
+                "   fragColor = texture(uTexture, vTexCoord);" +
                 "}";
 
     static final int COORDS_PER_VERTEX = 3;
     static final int COORDS_PER_TEXTURE = 2;
+    static final int COORDS_PER_BUFFER = COORDS_PER_VERTEX + COORDS_PER_TEXTURE; // vertex 3 + tex 2
     private FloatBuffer mVertexBuffer;
-    private FloatBuffer mTexBuffer;
     private ShortBuffer mIndexBuffer;
-
     private final int mProgram;
     private int mTexture;
 
     private final int mVertexCnt;
-    private final int mTexCoordCnt;
     private final int mIndiceCnt;
     private final int mVertexStride = COORDS_PER_VERTEX * 4;
-    private final int mTexCoordStride = COORDS_PER_TEXTURE * 4;
     private static final String TAG = "ErpToPers";
+    private int[] mVao;
 
     private Sphere mSphere;
 
@@ -52,7 +53,6 @@ public class ErpToPers
         mSphere = new Sphere(10.0f, 100, 100);
         mVertexCnt = mSphere.getVertices().length;
         mIndiceCnt = mSphere.getIndices().length;
-        mTexCoordCnt = mSphere.getTexCoords().length;
 
         ByteBuffer bb = ByteBuffer.allocateDirect(mVertexCnt * 4);
         bb.order(ByteOrder.nativeOrder());
@@ -66,42 +66,65 @@ public class ErpToPers
         mIndexBuffer.put(mSphere.getIndices());
         mIndexBuffer.position(0);
 
-        ByteBuffer tb = ByteBuffer.allocateDirect(mTexCoordCnt * 4);
-        tb.order(ByteOrder.nativeOrder());
-        mTexBuffer = tb.asFloatBuffer();
-        mTexBuffer.put(mSphere.getTexCoords());
-        mTexBuffer.position(0);
+        int vertexShader = MyGLRenderer.compileShader(mVertexCode, GLES30.GL_VERTEX_SHADER);
+        int fragmentShader = MyGLRenderer.compileShader(mFragmentCode, GLES30.GL_FRAGMENT_SHADER);
 
-        int vertexShader = MyGLRenderer.compileShader(mVertexCode, GLES20.GL_VERTEX_SHADER);
-        int fragmentShader = MyGLRenderer.compileShader(mFragmentCode, GLES20.GL_FRAGMENT_SHADER);
+        mProgram = GLES30.glCreateProgram();
+        GLES30.glAttachShader(mProgram, vertexShader);
+        GLES30.glAttachShader(mProgram, fragmentShader);
+        GLES30.glLinkProgram(mProgram);
 
-        mProgram = GLES20.glCreateProgram();
-        GLES20.glAttachShader(mProgram, vertexShader);
-        GLES20.glAttachShader(mProgram, fragmentShader);
-        GLES20.glLinkProgram(mProgram);
+        // vao
+        mVao = new int[1];
+        GLES30.glGenVertexArrays(1, mVao, 0);
+        GLES30.glBindVertexArray(mVao[0]);
 
-        int positionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition");
-        GLES20.glEnableVertexAttribArray(positionHandle);
-        GLES20.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride, mVertexBuffer);
+        // vbo
+        int[] vbo = new int[1];
+        GLES30.glGenBuffers(1, vbo, 0);
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vbo[0]);
+        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, 4 * mVertexCnt, mVertexBuffer, GLES30.GL_STATIC_DRAW);
 
-        int textureHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoord");
-        GLES20.glEnableVertexAttribArray(textureHandle);
-        GLES20.glVertexAttribPointer(textureHandle, COORDS_PER_TEXTURE, GLES20.GL_FLOAT, false, mTexCoordStride, mTexBuffer);
+        int positionHandle = GLES30.glGetAttribLocation(mProgram, "aPosition");
+        GLES30.glEnableVertexAttribArray(positionHandle);
+        GLES30.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX, GLES30.GL_FLOAT, false, COORDS_PER_BUFFER * 4, 0);
+
+        int textureHandle = GLES30.glGetAttribLocation(mProgram, "aTexCoord");
+        GLES30.glEnableVertexAttribArray(textureHandle);
+        GLES30.glVertexAttribPointer(textureHandle, COORDS_PER_TEXTURE, GLES30.GL_FLOAT, false, COORDS_PER_BUFFER * 4, COORDS_PER_VERTEX * 4);
+
+        int[] ebo = new int[1];
+        GLES30.glGenBuffers(1, ebo, 0);
+        GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
+        GLES30.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, 2 * mIndiceCnt, mIndexBuffer, GLES30.GL_STATIC_DRAW);
+
+        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+        GLES30.glBindVertexArray(0);
     }
 
     public void draw(float[] mvpMatrix)
     {
-        GLES20.glUseProgram(mProgram);
+        GLES30.glUseProgram(mProgram);
 
-        int mvpMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES30.glBindVertexArray(mVao[0]);
 
-        int textureUniformHandle = GLES20.glGetUniformLocation(mProgram, "uTexture");
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTexture);
-        GLES20.glUniform1i(textureUniformHandle, 0);
+        int mvpMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
+        GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndiceCnt, GLES20.GL_UNSIGNED_SHORT, mIndexBuffer);
+        int textureUniformHandle = GLES30.glGetUniformLocation(mProgram, "uTexture");
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture);
+        GLES30.glUniform1i(textureUniformHandle, 0);
+
+        GLES30.glDrawElements(GLES30.GL_TRIANGLES, mIndiceCnt, GLES30.GL_UNSIGNED_SHORT, 0);
+    }
+
+    private void checkGLError(String operation) {
+        int error;
+        while ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR) {
+            Log.e("MyGLRenderer", operation + ": glError " + error);
+            throw new RuntimeException(operation + ": glError " + error);
+        }
     }
 
     public void setTexture(int texture)
