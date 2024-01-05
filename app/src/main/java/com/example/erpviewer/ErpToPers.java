@@ -103,31 +103,31 @@ public class ErpToPers
         GLES30.glBindVertexArray(0);
 
         // Test
-        mPlaneVao = new int[1];
-        GLES30.glGenVertexArrays(1, mPlaneVao, 0);
-        GLES30.glBindVertexArray(mPlaneVao[0]);
-
-        int[] planeHandle = new int[1];
-        GLES30.glGenBuffers(1, planeHandle, 0);
-        GLES30.glBindBuffer(GLES20.GL_ARRAY_BUFFER, planeHandle[0]);
-        FloatBuffer vertexBuffer = ByteBuffer.allocateDirect(planeVertices.length * 4)
-                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-        vertexBuffer.put(planeVertices).position(0);
-        GLES30.glBufferData(GLES20.GL_ARRAY_BUFFER, planeVertices.length * 4, vertexBuffer, GLES30.GL_STATIC_DRAW);
-
-        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 5 * 4, 0);
-        GLES30.glEnableVertexAttribArray(0);
-        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 5 * 4, 12);
-        GLES30.glEnableVertexAttribArray(1);
-
-        ByteBuffer tb = ByteBuffer.allocateDirect(index.length * 2);
-        tb.order(ByteOrder.nativeOrder());
-        mTestBuffer = ib.asShortBuffer();
-        mTestBuffer.put(index);
-        mTestBuffer.position(0);
-
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
-        GLES30.glBindVertexArray(0);
+//        mPlaneVao = new int[1];
+//        GLES30.glGenVertexArrays(1, mPlaneVao, 0);
+//        GLES30.glBindVertexArray(mPlaneVao[0]);
+//
+//        int[] planeHandle = new int[1];
+//        GLES30.glGenBuffers(1, planeHandle, 0);
+//        GLES30.glBindBuffer(GLES20.GL_ARRAY_BUFFER, planeHandle[0]);
+//        FloatBuffer vertexBuffer = ByteBuffer.allocateDirect(planeVertices.length * 4)
+//                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+//        vertexBuffer.put(planeVertices).position(0);
+//        GLES30.glBufferData(GLES20.GL_ARRAY_BUFFER, planeVertices.length * 4, vertexBuffer, GLES30.GL_STATIC_DRAW);
+//
+//        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 5 * 4, 0);
+//        GLES30.glEnableVertexAttribArray(0);
+//        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 5 * 4, 12);
+//        GLES30.glEnableVertexAttribArray(1);
+//
+//        ByteBuffer tb = ByteBuffer.allocateDirect(index.length * 2);
+//        tb.order(ByteOrder.nativeOrder());
+//        mTestBuffer = ib.asShortBuffer();
+//        mTestBuffer.put(index);
+//        mTestBuffer.position(0);
+//
+//        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
+//        GLES30.glBindVertexArray(0);
     }
 
     public void draw(float[] mvpMatrix)
