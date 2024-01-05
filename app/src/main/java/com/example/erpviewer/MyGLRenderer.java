@@ -21,7 +21,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private volatile float mThetaAngle;
     private volatile float mPhiAngle;
-
+    private volatile float mNear = 3.0f;
+    private volatile float mFar = 10.0f;
+    private volatile float mRatio;
     public MyGLRenderer(Context context)
     {
         super();
@@ -42,6 +44,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
+        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, mNear, mFar);
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 0, 0f, 0f, 3f, 0f, 1.0f, 0.0f);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
@@ -57,11 +60,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     public void onSurfaceChanged(GL10 unused, int width, int height)
     {
-        float ratio = (float) width / height;
+        mRatio = (float) width / height;
         GLES20.glViewport(0, 0, width, height);
-        // change the near value to zoom in/out
-        // To Do : zoom in/out
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 40);
+
+        Matrix.frustumM(mProjectionMatrix, 0, -mRatio, mRatio, -1, 1, mNear, mFar);
     }
 
     public void changeTexture(int resourceId)
@@ -120,6 +122,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     {
         return mPhiAngle;
     }
+    public float getNear() { return mNear; }
 
     public void setTheta(float theta)
     {
@@ -129,5 +132,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void setPhi(float phi)
     {
         mPhiAngle = phi;
+    }
+    public void setNear(float near)
+    {
+        // set the near value to zoom in/out
+        if (near > mFar - 1.0f || near < 1)
+            return ;
+        mNear = near;
     }
 }
