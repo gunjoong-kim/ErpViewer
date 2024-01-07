@@ -150,7 +150,7 @@ public class ErpToPers
     private void checkGLError(String operation)
     {
         int error;
-        while ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR)
+        if ((error = GLES30.glGetError()) != GLES30.GL_NO_ERROR)
         {
             Log.e("MyGLRenderer", operation + ": glError " + error);
             throw new RuntimeException(operation + ": glError " + error);
