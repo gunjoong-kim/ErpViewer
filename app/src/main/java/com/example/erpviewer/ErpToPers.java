@@ -21,6 +21,17 @@ public class ErpToPers
                     "   gl_Position = uMVPMatrix * aPosition;" +
                     "   vTexCoord = aTexCoord;" +
                     "}";
+
+    private final String mVertexErpCode =
+                    "#version 300 es\n" +
+                    "layout(location = 0) in vec4 aPosition;" +
+                    "layout(location = 1) in vec2 aTexCoord;" +
+                    "out vec2 vTexCoord;" +
+                    "void main()" +
+                    "{" +
+                    "   gl_Position = aPosition;" +
+                    "   vTexCoord = aTexCoord;" +
+                    "}";
     private final String mFragmentCode =
                     "#version 300 es\n" +
                     "precision mediump float;" +
@@ -32,119 +43,22 @@ public class ErpToPers
                     "   fragColor = texture(uTexture, vTexCoord);" +
                     "}";
 
-    static final int COORDS_PER_VERTEX = 3;
-    static final int COORDS_PER_TEXTURE = 2;
-    static final int COORDS_PER_BUFFER = COORDS_PER_VERTEX + COORDS_PER_TEXTURE; // vertex 3 + tex 2
-    private FloatBuffer mVertexBuffer;
-    private ShortBuffer mIndexBuffer;
-    private ShortBuffer mTestBuffer;
-    private final int mProgram;
-    private int mTexture;
 
-    private final int mVertexCnt;
-    private final int mIndiceCnt;
-    private final int mVertexStride = COORDS_PER_VERTEX * 4;
+    private int mTexture;
     private static final String TAG = "ErpToPers";
-    private int[] mSphereVao;
-    private int[] mPlaneVao;
     private Sphere mSphere;
+    private Plane mPlane;
 
     public ErpToPers()
     {
-        mSphere = new Sphere(10.0f, 100, 100);
-        mVertexCnt = mSphere.getVertices().length;
-        mIndiceCnt = mSphere.getIndices().length;
-
-        ByteBuffer bb = ByteBuffer.allocateDirect(mVertexCnt * 4);
-        bb.order(ByteOrder.nativeOrder());
-        mVertexBuffer = bb.asFloatBuffer();
-        mVertexBuffer.put(mSphere.getVertices());
-        mVertexBuffer.position(0);
-
-        ByteBuffer ib = ByteBuffer.allocateDirect(mIndiceCnt * 2);
-        ib.order(ByteOrder.nativeOrder());
-        mIndexBuffer = ib.asShortBuffer();
-        mIndexBuffer.put(mSphere.getIndices());
-        mIndexBuffer.position(0);
-
-        int vertexShader = MyGLRenderer.compileShader(mVertexCode, GLES30.GL_VERTEX_SHADER);
-        int fragmentShader = MyGLRenderer.compileShader(mFragmentCode, GLES30.GL_FRAGMENT_SHADER);
-
-        mProgram = GLES30.glCreateProgram();
-        GLES30.glAttachShader(mProgram, vertexShader);
-        GLES30.glAttachShader(mProgram, fragmentShader);
-        GLES30.glLinkProgram(mProgram);
-
-        // vao
-        mSphereVao = new int[1];
-        GLES30.glGenVertexArrays(1, mSphereVao, 0);
-        GLES30.glBindVertexArray(mSphereVao[0]);
-
-        // vbo
-        int[] vbo = new int[1];
-        GLES30.glGenBuffers(1, vbo, 0);
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vbo[0]);
-        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, 4 * mVertexCnt, mVertexBuffer, GLES30.GL_STATIC_DRAW);
-
-        int positionHandle = GLES30.glGetAttribLocation(mProgram, "aPosition");
-        GLES30.glEnableVertexAttribArray(positionHandle);
-        GLES30.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX, GLES30.GL_FLOAT, false, COORDS_PER_BUFFER * 4, 0);
-
-        int textureHandle = GLES30.glGetAttribLocation(mProgram, "aTexCoord");
-        GLES30.glEnableVertexAttribArray(textureHandle);
-        GLES30.glVertexAttribPointer(textureHandle, COORDS_PER_TEXTURE, GLES30.GL_FLOAT, false, COORDS_PER_BUFFER * 4, COORDS_PER_VERTEX * 4);
-
-        int[] ebo = new int[1];
-        GLES30.glGenBuffers(1, ebo, 0);
-        GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
-        GLES30.glBufferData(GLES30.GL_ELEMENT_ARRAY_BUFFER, 2 * mIndiceCnt, mIndexBuffer, GLES30.GL_STATIC_DRAW);
-
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
-        GLES30.glBindVertexArray(0);
-
-        // Test
-//        mPlaneVao = new int[1];
-//        GLES30.glGenVertexArrays(1, mPlaneVao, 0);
-//        GLES30.glBindVertexArray(mPlaneVao[0]);
-//
-//        int[] planeHandle = new int[1];
-//        GLES30.glGenBuffers(1, planeHandle, 0);
-//        GLES30.glBindBuffer(GLES20.GL_ARRAY_BUFFER, planeHandle[0]);
-//        FloatBuffer vertexBuffer = ByteBuffer.allocateDirect(planeVertices.length * 4)
-//                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-//        vertexBuffer.put(planeVertices).position(0);
-//        GLES30.glBufferData(GLES20.GL_ARRAY_BUFFER, planeVertices.length * 4, vertexBuffer, GLES30.GL_STATIC_DRAW);
-//
-//        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 5 * 4, 0);
-//        GLES30.glEnableVertexAttribArray(0);
-//        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 5 * 4, 12);
-//        GLES30.glEnableVertexAttribArray(1);
-//
-//        ByteBuffer tb = ByteBuffer.allocateDirect(index.length * 2);
-//        tb.order(ByteOrder.nativeOrder());
-//        mTestBuffer = ib.asShortBuffer();
-//        mTestBuffer.put(index);
-//        mTestBuffer.position(0);
-//
-//        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
-//        GLES30.glBindVertexArray(0);
+        mSphere = new Sphere(10.0f, 100, 100, mVertexCode, mFragmentCode);
+        mPlane = new Plane(mVertexErpCode, mFragmentCode);
     }
 
     public void draw(float[] mvpMatrix)
     {
-        GLES30.glUseProgram(mProgram);
-
-        GLES30.glBindVertexArray(mSphereVao[0]);
-
-        int mvpMatrixHandle = GLES30.glGetUniformLocation(mProgram, "uMVPMatrix");
-        GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
-
-        int textureUniformHandle = GLES30.glGetUniformLocation(mProgram, "uTexture");
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mTexture);
-        GLES30.glUniform1i(textureUniformHandle, 0);
-
-        GLES30.glDrawElements(GLES30.GL_TRIANGLES, mIndiceCnt, GLES30.GL_UNSIGNED_SHORT, 0);
+        mSphere.drawSphere(mvpMatrix, mTexture);
+        //mPlane.drawPlane(mvpMatrix, mTexture);
     }
 
     private void checkGLError(String operation)

@@ -102,6 +102,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public static int compileShader(String shaderCode, int type)
     {
         int shader = GLES30.glCreateShader(type);
+
         GLES30.glShaderSource(shader, shaderCode);
         GLES30.glCompileShader(shader);
 
@@ -116,6 +117,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         }
 
         return shader;
+    }
+
+    public static int createProgram(String vertexCode, String fragCode)
+    {
+        int vertexShader = MyGLRenderer.compileShader(vertexCode, GLES30.GL_VERTEX_SHADER);
+        int fragmentShader = MyGLRenderer.compileShader(fragCode, GLES30.GL_FRAGMENT_SHADER);
+
+        int program = GLES30.glCreateProgram();
+        GLES30.glAttachShader(program, vertexShader);
+        GLES30.glAttachShader(program, fragmentShader);
+        GLES30.glLinkProgram(program);
+        return program;
     }
 
     public float getTheta()
